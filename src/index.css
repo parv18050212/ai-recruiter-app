@@ -52,6 +52,14 @@ All colors MUST be HSL.
     --success-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
+    
+    /* Gradient colors */
+    --gradient-primary-start: 217 91% 60%;
+    --gradient-primary-end: 262 83% 58%;
+    --gradient-accent-start: 142 76% 36%;
+    --gradient-accent-end: 173 80% 40%;
+    --gradient-card-start: 220 17% 99%;
+    --gradient-card-end: 220 17% 97%;
   }
 
   .dark {
@@ -96,6 +104,14 @@ All colors MUST be HSL.
     --success-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
+    
+    /* Gradient colors - dark mode */
+    --gradient-primary-start: 217 91% 60%;
+    --gradient-primary-end: 262 83% 58%;
+    --gradient-accent-start: 142 76% 40%;
+    --gradient-accent-end: 173 80% 45%;
+    --gradient-card-start: 217 33% 19%;
+    --gradient-card-end: 217 33% 17%;
   }
 }
 
