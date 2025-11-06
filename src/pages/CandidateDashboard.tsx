@@ -1,127 +1,133 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { api } from "@/lib/api";
-import { useToast } from "@/hooks/use-toast";
-import { Loader2, Mail, Calendar, CheckCircle2, XCircle } from "lucide-react";
+import { useAuth } from '@/contexts/AuthContext';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { LogOut, User, Mail, Calendar, FileText, Briefcase } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 
 const CandidateDashboard = () => {
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState<any>(null);
-  const { toast } = useToast();
+  const { user, signOut } = useAuth();
 
-  const handleCheckStatus = async () => {
-    if (!email) {
-      toast({
-        title: "Email Required",
-        description: "Please enter your email address",
-        variant: "destructive",
-      });
-      return;
+  const getInitials = () => {
+    if (user?.user_metadata?.full_name) {
+      return user.user_metadata.full_name
+        .split(' ')
+        .map((n: string) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
     }
-
-    setLoading(true);
-    try {
-      const data = await api.getCandidateStatus(email);
-      setStatus(data);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch status. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const renderStatusView = () => {
-    if (!status) return null;
-
-    switch (status.status) {
-      case "Applied":
-        return (
-          <Alert className="border-primary bg-primary/5">
-            <Mail className="h-5 w-5 text-primary" />
-            <AlertDescription className="ml-2">
-              We have received your application for the <strong>'{status.job_title}'</strong> position. 
-              We are currently reviewing it.
-            </AlertDescription>
-          </Alert>
-        );
-      
-      case "Scheduled":
-        return (
-          <Alert className="border-accent bg-accent/5">
-            <CheckCircle2 className="h-5 w-5 text-accent" />
-            <AlertDescription className="ml-2">
-              Congratulations! Your interview is scheduled for{" "}
-              <strong>{new Date(status.interview_time).toLocaleString()}</strong>. 
-              Please check your email for the calendar invite and Google Meet link.
-            </AlertDescription>
-          </Alert>
-        );
-      
-      case "Rejected":
-        return (
-          <Alert className="border-muted">
-            <XCircle className="h-5 w-5 text-muted-foreground" />
-            <AlertDescription className="ml-2">
-              Thank you for your interest. After careful review, we have decided to move 
-              forward with other candidates at this time.
-            </AlertDescription>
-          </Alert>
-        );
-      
-      default:
-        return (
-          <Alert>
-            <AlertDescription>
-              Status: {status.status}
-            </AlertDescription>
-          </Alert>
-        );
-    }
+    return user?.email?.slice(0, 2).toUpperCase() || 'U';
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6">
-      <Card className="w-full max-w-2xl">
-        <CardHeader className="text-center">
-          <CardTitle className="text-3xl">Check Application Status</CardTitle>
-          <CardDescription>
-            Enter your email to view your recruitment status
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex gap-3">
-            <Input
-              type="email"
-              placeholder="your.email@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleCheckStatus()}
-            />
-            <Button onClick={handleCheckStatus} disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Checking...
-                </>
-              ) : (
-                "Check Status"
-              )}
+    <div className="min-h-screen bg-background">
+      <header className="border-b bg-card">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">
+              AI Recruitment Manager
+            </h1>
+            <p className="text-sm text-muted-foreground">Candidate Portal</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-9 w-9">
+                <AvatarFallback className="bg-primary text-primary-foreground">
+                  {getInitials()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="hidden md:block">
+                <p className="text-sm font-medium">
+                  {user?.user_metadata?.full_name || 'Candidate'}
+                </p>
+                <p className="text-xs text-muted-foreground">{user?.email}</p>
+              </div>
+            </div>
+            <Button variant="outline" size="sm" onClick={signOut}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
             </Button>
           </div>
+        </div>
+      </header>
 
-          {renderStatusView()}
-        </CardContent>
-      </Card>
+      <main className="container mx-auto px-6 py-8">
+        <Tabs defaultValue="applications" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="applications">My Applications</TabsTrigger>
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="applications" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Application Status</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12">
+                  <Briefcase className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No applications yet</h3>
+                  <p className="text-muted-foreground mb-6">
+                    You haven't applied to any positions. Check back after submitting your application through the HR team.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="profile" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Personal Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center gap-6">
+                  <Avatar className="h-20 w-20">
+                    <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
+                      {getInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="space-y-1">
+                    <h3 className="text-xl font-semibold">
+                      {user?.user_metadata?.full_name || 'Candidate'}
+                    </h3>
+                    <Badge variant="secondary">Job Candidate</Badge>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label className="text-muted-foreground flex items-center gap-2">
+                      <Mail className="h-4 w-4" />
+                      Email
+                    </Label>
+                    <p className="font-medium">{user?.email}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-muted-foreground flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      Full Name
+                    </Label>
+                    <p className="font-medium">
+                      {user?.user_metadata?.full_name || 'Not provided'}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </main>
     </div>
   );
 };
+
+const Label = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
+  <label className={`text-sm font-medium leading-none ${className}`}>
+    {children}
+  </label>
+);
 
 export default CandidateDashboard;

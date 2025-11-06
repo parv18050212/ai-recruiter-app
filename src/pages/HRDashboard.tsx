@@ -1,52 +1,50 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PendingApprovalsTab } from "@/components/hr/PendingApprovalsTab";
-import { JobShortlistsTab } from "@/components/hr/JobShortlistsTab";
-import { JobManagementTab } from "@/components/hr/JobManagementTab";
-import { ClipboardCheck, Users, Briefcase } from "lucide-react";
+import { useSearchParams } from 'react-router-dom';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/AppSidebar';
+import { PendingApprovalsTab } from '@/components/hr/PendingApprovalsTab';
+import { JobShortlistsTab } from '@/components/hr/JobShortlistsTab';
+import { JobManagementTab } from '@/components/hr/JobManagementTab';
+import { OverviewTab } from '@/components/hr/OverviewTab';
 
 const HRDashboard = () => {
+  const [searchParams] = useSearchParams();
+  const currentTab = searchParams.get('tab') || 'overview';
+
+  const renderContent = () => {
+    switch (currentTab) {
+      case 'pending':
+        return <PendingApprovalsTab />;
+      case 'shortlists':
+        return <JobShortlistsTab />;
+      case 'management':
+        return <JobManagementTab />;
+      default:
+        return <OverviewTab />;
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-6 py-6">
-          <h1 className="text-3xl font-bold text-foreground">
-            AI Recruitment Manager
-          </h1>
-          <p className="text-muted-foreground mt-1">HR Control Panel</p>
+    <SidebarProvider defaultOpen>
+      <div className="flex min-h-screen w-full bg-background">
+        <AppSidebar />
+        <div className="flex-1 flex flex-col">
+          <header className="sticky top-0 z-10 border-b bg-card px-6 py-4">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger />
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">
+                  AI Recruitment Manager
+                </h1>
+                <p className="text-sm text-muted-foreground">HR Control Panel</p>
+              </div>
+            </div>
+          </header>
+          <main className="flex-1 p-6">
+            {renderContent()}
+          </main>
         </div>
-      </header>
-
-      <main className="container mx-auto px-6 py-8">
-        <Tabs defaultValue="pending" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
-            <TabsTrigger value="pending" className="gap-2">
-              <ClipboardCheck className="h-4 w-4" />
-              Pending Approvals
-            </TabsTrigger>
-            <TabsTrigger value="shortlists" className="gap-2">
-              <Users className="h-4 w-4" />
-              Job Shortlists
-            </TabsTrigger>
-            <TabsTrigger value="management" className="gap-2">
-              <Briefcase className="h-4 w-4" />
-              Job Management
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="pending">
-            <PendingApprovalsTab />
-          </TabsContent>
-
-          <TabsContent value="shortlists">
-            <JobShortlistsTab />
-          </TabsContent>
-
-          <TabsContent value="management">
-            <JobManagementTab />
-          </TabsContent>
-        </Tabs>
-      </main>
-    </div>
+      </div>
+    </SidebarProvider>
   );
 };
 
