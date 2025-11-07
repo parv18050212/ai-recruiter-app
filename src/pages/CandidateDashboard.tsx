@@ -2,9 +2,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { LogOut, User, Mail, Calendar, FileText, Briefcase } from 'lucide-react';
+import { LogOut, User, Mail } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { JobsTab } from '@/components/candidate/JobsTab';
+import { ApplicationsTab } from '@/components/candidate/ApplicationsTab';
 
 const CandidateDashboard = () => {
   const { user, signOut } = useAuth();
@@ -54,27 +56,26 @@ const CandidateDashboard = () => {
       </header>
 
       <main className="container mx-auto px-6 py-8">
-        <Tabs defaultValue="applications" className="space-y-6">
+        <Tabs defaultValue="jobs" className="space-y-6">
           <TabsList>
+            <TabsTrigger value="jobs">Browse Jobs</TabsTrigger>
             <TabsTrigger value="applications">My Applications</TabsTrigger>
             <TabsTrigger value="profile">Profile</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="applications" className="space-y-4">
+          <TabsContent value="jobs" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Application Status</CardTitle>
+                <CardTitle>Available Jobs</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12">
-                  <Briefcase className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No applications yet</h3>
-                  <p className="text-muted-foreground mb-6">
-                    You haven't applied to any positions. Check back after submitting your application through the HR team.
-                  </p>
-                </div>
+                <JobsTab />
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="applications" className="space-y-4">
+            <ApplicationsTab />
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-4">
