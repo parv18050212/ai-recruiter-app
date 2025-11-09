@@ -3,21 +3,20 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
+import { api } from "@/lib/api";
 import { JobApplicationDialog } from "./JobApplicationDialog";
-import { Briefcase, Calendar } from "lucide-react";
+import { Briefcase, Calendar, AlertCircle, RefreshCw } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export const JobsTab = () => {
   const [selectedJob, setSelectedJob] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const { data: jobs, isLoading } = useQuery({
+  const { data: jobs, isLoading, error, refetch } = useQuery({
     queryKey: ["jobs"],
-    queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke("get-jobs");
-      if (error) throw error;
-      return data;
-    },
+    queryFn: api.getJobs,
+    retry: 1,
   });
 
   const handleApply = (job: any) => {
@@ -27,9 +26,46 @@ export const JobsTab = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Loading jobs...</p>
+      <div className="grid gap-4 md:grid-cols-2">
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i}>
+            <CardHeader>
+              <Skeleton className="h-6 w-3/4 mb-2" />
+              <Skeleton className="h-4 w-1/2" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-4 w-full mb-2" />
+              <Skeleton className="h-4 w-full mb-2" />
+              <Skeleton className="h-4 w-2/3 mb-4" />
+              <Skeleton className="h-10 w-full" />
+            </CardContent>
+          </Card>
+        ))}
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription className="flex items-center justify-between">
+          <span>
+            {error.message.includes('timeout') 
+              ? 'Backend server not responding. Please try again.' 
+              : 'Failed to load jobs. Please check your connection.'}
+          </span>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => refetch()}
+            className="ml-4"
+          >
+            <RefreshCw className="h-3 w-3 mr-2" />
+            Retry
+          </Button>
+        </AlertDescription>
+      </Alert>
     );
   }
 
