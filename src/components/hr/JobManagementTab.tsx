@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Briefcase, Users, TrendingUp } from "lucide-react";
+import { Loader2, Plus, Briefcase, Users, TrendingUp, AlertCircle, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ManualUploadDialog } from "./ManualUploadDialog";
 
@@ -16,9 +17,10 @@ export const JobManagementTab = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: jobs } = useQuery({
+  const { data: jobs, error: jobsError, refetch } = useQuery({
     queryKey: ["jobs"],
     queryFn: api.getJobs,
+    retry: 1,
   });
 
   const createJobMutation = useMutation({
@@ -59,6 +61,29 @@ export const JobManagementTab = () => {
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
         <div className="absolute bottom-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mb-20"></div>
       </div>
+
+      {/* Error Alert */}
+      {jobsError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>
+              {jobsError.message.includes('timeout')
+                ? 'Backend server not responding. Job list may be outdated.'
+                : 'Failed to load jobs. Some features may be unavailable.'}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              className="ml-4"
+            >
+              <RefreshCw className="h-3 w-3 mr-2" />
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-3">

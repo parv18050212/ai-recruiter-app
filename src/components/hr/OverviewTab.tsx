@@ -1,18 +1,22 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Briefcase, Users, ClipboardCheck, TrendingUp } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Briefcase, Users, ClipboardCheck, TrendingUp, AlertCircle, RefreshCw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export const OverviewTab = () => {
-  const { data: jobs, isLoading: jobsLoading } = useQuery({
+  const { data: jobs, isLoading: jobsLoading, error: jobsError, refetch: refetchJobs } = useQuery({
     queryKey: ['jobs'],
     queryFn: api.getJobs,
+    retry: 1,
   });
 
-  const { data: pendingInterviews, isLoading: pendingLoading } = useQuery({
+  const { data: pendingInterviews, isLoading: pendingLoading, error: pendingError, refetch: refetchPending } = useQuery({
     queryKey: ['pendingInterviews'],
     queryFn: api.getPendingInterviews,
+    retry: 1,
   });
 
   const stats = [
@@ -63,6 +67,42 @@ export const OverviewTab = () => {
             </Card>
           ))}
         </div>
+      </div>
+    );
+  }
+
+  if (jobsError || pendingError) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Dashboard Overview</h2>
+          <p className="text-muted-foreground">
+            Key metrics and insights for your recruitment pipeline
+          </p>
+        </div>
+        
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>
+              {(jobsError?.message || pendingError?.message || '').includes('timeout')
+                ? 'Backend server not responding. Please try again.'
+                : 'Failed to load dashboard data. Please check your connection.'}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                refetchJobs();
+                refetchPending();
+              }}
+              className="ml-4"
+            >
+              <RefreshCw className="h-3 w-3 mr-2" />
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
