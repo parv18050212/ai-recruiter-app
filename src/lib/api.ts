@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://3.108.237.107:8000";
+const API_BASE_URL = " http://127.0.0.1:8000";
 
 export const api = {
   // Pending Approvals
