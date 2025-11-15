@@ -1,4 +1,4 @@
-import { LayoutDashboard, ClipboardCheck, Users, Briefcase, LogOut, User } from 'lucide-react';
+import { LayoutDashboard, ClipboardCheck, Users, Briefcase, LogOut, User, BrainCircuit } from 'lucide-react';
 import { useLocation, Link } from 'react-router-dom';
 import {
   Sidebar,
@@ -21,6 +21,7 @@ const hrMenuItems = [
   { title: 'Pending Approvals', url: '/hr?tab=pending', icon: ClipboardCheck, value: 'pending' },
   { title: 'Job Shortlists', url: '/hr?tab=shortlists', icon: Users, value: 'shortlists' },
   { title: 'Job Management', url: '/hr?tab=management', icon: Briefcase, value: 'management' },
+  { title: 'Analytics', url: '/hr?tab=analytics', icon: BrainCircuit, value: 'analytics' },
 ];
 
 export function AppSidebar() {

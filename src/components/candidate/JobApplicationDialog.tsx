@@ -4,7 +4,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
+// --- Removed ---
+// import { supabase } from "@/integrations/supabase/client"; 
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Upload } from "lucide-react";
@@ -15,49 +16,58 @@ interface JobApplicationDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+// --- Added ---
+// Define your backend URL
+const API_URL = "http://127.0.0.1:8000";
+
 export const JobApplicationDialog = ({ job, open, onOpenChange }: JobApplicationDialogProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [resume, setResume] = useState<File | null>(null);
 
-  const uploadMutation = useMutation({
+  // --- Renamed and completely new mutation function ---
+  const applyMutation = useMutation({
     mutationFn: async () => {
-      if (!job || !user) throw new Error("Missing job or user");
-
-      let resumeUrl = null;
-
-      // Upload resume if provided
-      if (resume) {
-        const fileExt = resume.name.split(".").pop();
-        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from("resumes")
-          .upload(fileName, resume);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from("resumes")
-          .getPublicUrl(fileName);
-
-        resumeUrl = publicUrl;
+      // Your new API requires a resume, name, and email
+      if (!job || !user || !resume) {
+        throw new Error("Missing job, user, or resume file");
       }
 
-      // Create application via edge function
-      const { data, error } = await supabase.functions.invoke("apply-job", {
-        body: {
-          job_id: job.id,
-          job_title: job.title,
-          resume_url: resumeUrl,
-        },
+      // Get name and email from the authenticated user
+      // Assumes 'user.email' and 'user.user_metadata.full_name' exist
+      const email = user.email;
+      const name = user.user_metadata?.full_name || user.email; // Fallback to email if no name
+
+      if (!email) {
+        throw new Error("User email not found. Please log in again.");
+      }
+
+      // 1. Create FormData
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("email", email);
+      formData.append("resume", resume); // 'resume' is the File object
+
+      // 2. Call your FastAPI backend
+      const response = await fetch(`${API_URL}/jobs/${job.id}/candidates`, {
+        method: 'POST',
+        body: formData,
+        // No 'Content-Type' header needed; browser sets it for FormData
       });
 
-      if (error) throw error;
-      return data;
+      if (!response.ok) {
+        // Try to parse error details from your FastAPI backend
+        const errorBody = await response.json();
+        throw new Error(errorBody.detail || `Failed to submit application: ${response.statusText}`);
+      }
+
+      // 3. Return the successful response
+      return response.json();
     },
-    onSuccess: () => {
-      toast.success("Application submitted successfully!");
+    onSuccess: (data) => {
+      // 'data' is now the response from your FastAPI backend
+      console.log("Application successful:", data);
+      toast.success(`Application submitted! Fit score: ${data.fit_score.toFixed(2)}`);
       queryClient.invalidateQueries({ queryKey: ["applications"] });
       onOpenChange(false);
       setResume(null);
@@ -69,7 +79,13 @@ export const JobApplicationDialog = ({ job, open, onOpenChange }: JobApplication
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    uploadMutation.mutate();
+    // --- Added ---
+    // Add check to ensure resume is selected
+    if (!resume) {
+      toast.error("Please upload a resume to apply.");
+      return;
+    }
+    applyMutation.mutate();
   };
 
   if (!job) return null;
@@ -86,13 +102,16 @@ export const JobApplicationDialog = ({ job, open, onOpenChange }: JobApplication
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="resume">Resume (Optional)</Label>
+            {/* --- Updated Label --- */}
+            <Label htmlFor="resume">Resume</Label>
             <div className="mt-2">
               <Input
                 id="resume"
                 type="file"
                 accept=".pdf,.doc,.docx"
                 onChange={(e) => setResume(e.target.files?.[0] || null)}
+                // --- Added ---
+                required 
               />
               {resume && (
                 <p className="text-sm text-muted-foreground mt-2 flex items-center gap-2">
@@ -108,12 +127,14 @@ export const JobApplicationDialog = ({ job, open, onOpenChange }: JobApplication
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              disabled={uploadMutation.isPending}
+              // --- Updated ---
+              disabled={applyMutation.isPending} 
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={uploadMutation.isPending}>
-              {uploadMutation.isPending ? "Submitting..." : "Submit Application"}
+            {/* --- Updated --- */}
+            <Button type="submit" disabled={applyMutation.isPending}>
+              {applyMutation.isPending ? "Submitting..." : "Submit Application"}
             </Button>
           </div>
         </form>

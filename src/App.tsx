@@ -11,7 +11,7 @@ import Signup from "./pages/Signup";
 import HRDashboard from "./pages/HRDashboard";
 import CandidateDashboard from "./pages/CandidateDashboard";
 import NotFound from "./pages/NotFound";
-
+import ExamPage from "./pages/ExamPage"; // <-- 1. IMPORT THE NEW PAGE
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -41,6 +41,8 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route path="/exam/:token" element={<ExamPage />} />
+            
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

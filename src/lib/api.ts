@@ -1,36 +1,17 @@
-const API_BASE_URL = " http://127.0.0.1:8000";
-
-// Timeout helper to prevent hanging
-const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeout = 5000) => {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
-  try {
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
-    return response;
-  } catch (error: any) {
-    clearTimeout(timeoutId);
-    if (error.name === 'AbortError') {
-      throw new Error('Request timeout - backend server not responding');
-    }
-    throw error;
-  }
-};
+// src/lib/api.ts
+const API_BASE_URL = "http://YOUR_EC2_IP:8000"; // Or http://127.0.0.1:8000 for local dev
 
 export const api = {
-  // Pending Approvals
+  // === HR Endpoints ===
+  
   getPendingInterviews: async () => {
-    const response = await fetchWithTimeout(`${API_BASE_URL}/pending-interviews`);
+    const response = await fetch(`${API_BASE_URL}/pending-interviews`);
     if (!response.ok) throw new Error("Failed to fetch pending interviews");
     return response.json();
   },
 
   approveInterview: async (interviewId: string) => {
-    const response = await fetchWithTimeout(
+    const response = await fetch(
       `${API_BASE_URL}/pending-interviews/${interviewId}/approve`,
       { method: "POST" }
     );
@@ -38,15 +19,14 @@ export const api = {
     return response.json();
   },
 
-  // Jobs
   getJobs: async () => {
-    const response = await fetchWithTimeout(`${API_BASE_URL}/jobs`);
+    const response = await fetch(`${API_BASE_URL}/jobs`);
     if (!response.ok) throw new Error("Failed to fetch jobs");
     return response.json();
   },
 
   createJob: async (title: string, description: string) => {
-    const response = await fetchWithTimeout(`${API_BASE_URL}/jobs`, {
+    const response = await fetch(`${API_BASE_URL}/jobs`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, description_text: description }),
@@ -55,9 +35,8 @@ export const api = {
     return response.json();
   },
 
-  // Shortlists
   getJobShortlist: async (jobId: string) => {
-    const response = await fetchWithTimeout(`${API_BASE_URL}/jobs/${jobId}/shortlist`);
+    const response = await fetch(`${API_BASE_URL}/jobs/${jobId}/shortlist`);
     if (!response.ok) throw new Error("Failed to fetch shortlist");
     return response.json();
   },
@@ -68,7 +47,7 @@ export const api = {
     decision: string,
     comments: string
   ) => {
-    const response = await fetchWithTimeout(
+    const response = await fetch(
       `${API_BASE_URL}/jobs/${jobId}/candidates/${candidateId}/feedback`,
       {
         method: "POST",
@@ -83,7 +62,40 @@ export const api = {
     return response.json();
   },
 
-  // Candidates
+  // === NEW: Detailed Score (Grand Project) ===
+  getDetailedAnalysis: async (candidateId: string) => {
+    const response = await fetch(
+      `${API_BASE_URL}/candidates/${candidateId}/analysis`
+    );
+    if (!response.ok) throw new Error("Failed to fetch detailed analysis");
+    return response.json();
+  },
+
+  // === NEW: Chat with SQL (Grand Project) ===
+  getChatResponse: async (question: string, chatHistory: any[]) => {
+    const response = await fetch(`${API_BASE_URL}/hr/chat-analytics`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        question: question,
+        chat_history: chatHistory,
+      }),
+    });
+    if (!response.ok) throw new Error("Failed to get chat response");
+    return response.json();
+  },
+
+  // === NEW: Get Candidate Exam Results (Grand Project) ===
+  getCandidateExamResults: async (candidateId: string) => {
+    const response = await fetch(
+      `${API_BASE_URL}/hr/candidate-exams/${candidateId}`
+    );
+    if (!response.ok) throw new Error("Failed to fetch exam results");
+    return response.json();
+  },
+
+  // === Candidate & Public Endpoints ===
+
   uploadCandidate: async (
     jobId: string,
     name: string,
@@ -95,20 +107,37 @@ export const api = {
     formData.append("email", email);
     formData.append("resume", resume);
 
-    const response = await fetchWithTimeout(`${API_BASE_URL}/jobs/${jobId}/candidates`, {
+    const response = await fetch(`${API_BASE_URL}/jobs/${jobId}/candidates`, {
       method: "POST",
       body: formData,
-    }, 10000); // 10s timeout for file upload
+    });
     if (!response.ok) throw new Error("Failed to upload candidate");
     return response.json();
   },
 
-  // Candidate Status
   getCandidateStatus: async (email: string) => {
-    const response = await fetchWithTimeout(
+    // This endpoint still needs to be built on the backend
+    const response = await fetch(
       `${API_BASE_URL}/candidate-status?email=${encodeURIComponent(email)}`
     );
     if (!response.ok) throw new Error("Failed to fetch candidate status");
+    return response.json();
+  },
+  
+  // === NEW: Exam Platform (Grand Project) ===
+  getExamQuestions: async (token: string) => {
+    const response = await fetch(`${API_BASE_URL}/exam/${token}`);
+    if (!response.ok) throw new Error("Failed to fetch exam. Link may be invalid or expired.");
+    return response.json();
+  },
+
+  submitExamAnswers: async (token: string, answers: any) => {
+    const response = await fetch(`${API_BASE_URL}/exam/${token}/submit`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ answers: answers }),
+    });
+    if (!response.ok) throw new Error("Failed to submit exam");
     return response.json();
   },
 };

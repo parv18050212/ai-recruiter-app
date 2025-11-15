@@ -5,7 +5,7 @@ import { PendingApprovalsTab } from '@/components/hr/PendingApprovalsTab';
 import { JobShortlistsTab } from '@/components/hr/JobShortlistsTab';
 import { JobManagementTab } from '@/components/hr/JobManagementTab';
 import { OverviewTab } from '@/components/hr/OverviewTab';
-
+import { AnalyticsTab } from '@/components/hr/AnalyticsTab'; // <-- 1. IMPORT NEW TAB
 const HRDashboard = () => {
   const [searchParams] = useSearchParams();
   const currentTab = searchParams.get('tab') || 'overview';
@@ -17,6 +17,8 @@ const HRDashboard = () => {
       case 'shortlists':
         return <JobShortlistsTab />;
       case 'management':
+      case 'analytics':
+        return <AnalyticsTab />;
         return <JobManagementTab />;
       default:
         return <OverviewTab />;

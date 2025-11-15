@@ -17,6 +17,20 @@ export const JobsTab = () => {
     queryKey: ["jobs"],
     queryFn: api.getJobs,
     retry: 1,
+
+    // --- THIS IS THE FIX ---
+    // The 'select' option transforms the data after it's fetched.
+    // We map the array and copy 'job_id' to a new 'id' property.
+    select: (data) => {
+      if (!Array.isArray(data)) {
+        return []; // Return empty array if data is not as expected
+      }
+      return data.map(job => ({
+        ...job,
+        id: job.job_id, // Create the 'id' property
+      }));
+    },
+    // --- END OF FIX ---
   });
 
   const handleApply = (job: any) => {
@@ -83,6 +97,7 @@ export const JobsTab = () => {
     <>
       <div className="grid gap-4 md:grid-cols-2">
         {jobs.map((job: any) => (
+          // Now 'job.id' will be correctly populated from 'job.job_id'
           <Card key={job.id} className="hover:shadow-lg transition-shadow">
             <CardHeader>
               <div className="flex items-start justify-between">
@@ -94,6 +109,7 @@ export const JobsTab = () => {
               </div>
               <CardDescription className="flex items-center gap-2 mt-2">
                 <Calendar className="h-4 w-4" />
+                {/* API docs show 'created_at', so this should be fine */}
                 Posted: {new Date(job.created_at).toLocaleDateString()}
               </CardDescription>
             </CardHeader>
