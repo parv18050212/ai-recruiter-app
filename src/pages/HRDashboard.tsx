@@ -17,10 +17,11 @@ const HRDashboard = () => {
       case 'shortlists':
         return <JobShortlistsTab />;
       case 'management':
-      case 'analytics':
-        return <AnalyticsTab />;
         return <JobManagementTab />;
       default:
+      case 'analytics': // <-- 2. ADD NEW CASE
+        return <AnalyticsTab />; // <-- 3. RENDER NEW TAB
+      case 'overview':http://127.0.0.1:8000
         return <OverviewTab />;
     }
   };

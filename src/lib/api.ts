@@ -1,12 +1,18 @@
 // src/lib/api.ts
-const API_BASE_URL = "http://YOUR_EC2_IP:8000"; // Or http://127.0.0.1:8000 for local dev
+const API_BASE_URL = "http://127.0.0.1:8000"; // Or http://127.0.0.1:8000 for local dev
 
 export const api = {
   // === HR Endpoints ===
-  
+
   getPendingInterviews: async () => {
     const response = await fetch(`${API_BASE_URL}/pending-interviews`);
     if (!response.ok) throw new Error("Failed to fetch pending interviews");
+    return response.json();
+  },
+
+  getAllCandidates: async (jobId: string) => {
+    const response = await fetch(`${API_BASE_URL}/jobs/${jobId}/candidates`);
+    if (!response.ok) throw new Error("Failed to fetch candidates");
     return response.json();
   },
 
@@ -123,7 +129,7 @@ export const api = {
     if (!response.ok) throw new Error("Failed to fetch candidate status");
     return response.json();
   },
-  
+
   // === NEW: Exam Platform (Grand Project) ===
   getExamQuestions: async (token: string) => {
     const response = await fetch(`${API_BASE_URL}/exam/${token}`);
@@ -138,6 +144,13 @@ export const api = {
       body: JSON.stringify({ answers: answers }),
     });
     if (!response.ok) throw new Error("Failed to submit exam");
+    return response.json();
+  },
+
+  // === NEW: Analytics Dashboard ===
+  getDashboardMetrics: async () => {
+    const response = await fetch(`${API_BASE_URL}/analytics/dashboard`);
+    if (!response.ok) throw new Error("Failed to fetch dashboard metrics");
     return response.json();
   },
 };
