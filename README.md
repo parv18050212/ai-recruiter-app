@@ -1,73 +1,200 @@
-# Welcome to your Lovable project
+# 🌐 AI Recruiter Platform — Frontend (React + Vite + TypeScript)
 
-## Project info
+[![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite)](https://vitejs.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind](https://img.shields.io/badge/TailwindCSS-38B2AC?style=flat&logo=tailwindcss)](https://tailwindcss.com/)
+[![shadcn/ui](https://img.shields.io/badge/shadcn/ui-000000?style=flat)](https://ui.shadcn.com/)
 
-**URL**: https://lovable.dev/projects/fbaff905-bb38-4e46-a53a-aaf26c4229f6
+> **Modern, production-focused frontend for the Autonomous AI Recruitment Manager.**
+> Clean UI for HR teams, candidate tracking, resume ingestion, and real-time interview status synced with the backend orchestration engine.
 
-## How can I edit this code?
+Backend repo: **https://github.com/parv18050212/hr_agent**
 
-There are several ways of editing your application.
+---
 
-**Use Lovable**
+# 🚀 Overview
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/fbaff905-bb38-4e46-a53a-aaf26c4229f6) and start prompting.
+This frontend is designed to provide a **professional-grade dashboard** for HR teams and a **self-service portal** for candidates.
 
-Changes made via Lovable will be committed automatically to this repo.
+It interacts with the backend’s automated pipeline that:
 
-**Use your preferred IDE**
+- Scores resumes using **Gemini embeddings**
+- Flags high-fit candidates
+- Sends interview proposals for approval
+- Books Google Calendar meetings
+- Emails candidates automatically
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+The frontend delivers a smooth UI for managing all of this.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+# 🎯 Features
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### ✅ **HR Dashboard**
+- View all open job roles  
+- Upload and manage resumes  
+- View AI-generated match scores  
+- Review interview proposals (Pending → Approve → Auto-book)  
+- Track interview stages and meet links  
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### ✅ **Candidate Portal**
+- Enter email to view application status  
+- Receive real-time updates once HR approves interviews  
 
-# Step 3: Install the necessary dependencies.
-npm i
+### ✅ **Beautiful UI**
+- Built with **shadcn/ui**, **TailwindCSS**, and clean component architecture  
+- Mobile-friendly layouts  
+- Dark/light mode compatible  
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+### ✅ **API Integration Layer**
+- Typed service wrappers to interact with FastAPI backend  
+- Endpoints for:
+  - Jobs
+  - Candidates
+  - Resume upload
+  - Pending interviews
+  - Approvals
+  - Candidate status view
+
+### ✅ **Production-Ready Setup**
+- Vite bundling  
+- Environment-based API URLs  
+- Docker-ready  
+- CI/CD friendly structure  
+
+---
+
+# 🏗️ Tech Stack
+
+| Layer | Tools |
+|------|-------|
+| Frontend Framework | React + TypeScript |
+| UI | TailwindCSS, shadcn/ui |
+| Build Tool | Vite |
+| State Handling | React Query / Local State |
+| API | Fetch/axios wrappers calling FastAPI backend |
+| Deployment | Vercel / Netlify / Docker |
+
+---
+
+# 📁 Project Structure
+
+```
+ai-recruiter-app/
+├── src/
+│   ├── components/          # Reusable UI components
+│   ├── pages/               # Candidate + HR pages
+│   ├── api/                 # API service wrappers
+│   ├── hooks/               # Custom React hooks
+│   ├── lib/                 # Utilities
+│   ├── App.tsx
+│   └── main.tsx
+├── public/
+├── index.html
+├── package.json
+├── tailwind.config.js
+├── vite.config.ts
+└── README.md
 ```
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+# ⚙️ Setup & Installation
 
-**Use GitHub Codespaces**
+```bash
+git clone https://github.com/parv18050212/ai-recruiter-app
+cd ai-recruiter-app
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+npm install          # install dependencies
+npm run dev          # start dev server on localhost:5173
+```
 
-## What technologies are used for this project?
+---
 
-This project is built with:
+# 🔌 API Configuration
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Create a `.env` file:
 
-## How can I deploy this project?
+```
+VITE_API_BASE_URL=http://localhost:8000
+```
 
-Simply open [Lovable](https://lovable.dev/projects/fbaff905-bb38-4e46-a53a-aaf26c4229f6) and click on Share -> Publish.
+Frontend will call:
 
-## Can I connect a custom domain to my Lovable project?
+```
+GET  /jobs
+POST /jobs/:id/candidates
+GET  /pending-interviews
+POST /pending-interviews/:id/approve
+GET  /my-applications/:email
+```
 
-Yes, you can!
+Vite proxy can also be used during development.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+---
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+# 🧪 Development Workflow
+
+### Start Dev Servers
+```bash
+npm run dev      # frontend
+uvicorn hr_agent.app.main:app --reload  # backend
+```
+
+### Build for Production
+```bash
+npm run build
+npm run preview
+```
+
+---
+
+# 🌍 Deployment
+
+### Recommended approaches:
+- **Vercel** (static hosting + environment variables)
+- **Netlify**
+- **Docker container + Nginx**
+- **Serve behind reverse proxy hitting FastAPI backend**
+
+Minimal Dockerfile:
+
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0"]
+```
+
+---
+
+# 🛤️ Roadmap
+
+- Add HR analytics dashboard  
+- Add real-time WebSocket updates  
+- Add role-based authentication (HR, Recruiter, Candidate)  
+- Add resume preview UI  
+- Add drag-and-drop resume upload  
+
+---
+
+# 📄 License
+
+MIT — free to use, modify, and deploy.
+
+---
+
+# 🙌 Acknowledgements
+
+This UI powers the **Autonomous Recruitment Manager**, a full-stack system leveraging:
+
+- Google Gemini  
+- LangGraph agent workflows  
+- FastAPI backend  
+- pgvector semantic search  
+
+Frontend + backend together provide end-to-end AI-powered recruitment automation.
